@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ad Budget Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="header-logo">📊</div>
+    <div>
+      <div class="header-title">Ad Budget Simulator</div>
+      <div class="header-sub">Simulate Purchase / Revenue / ROAS impact of daily budget changes</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TAB NAVIGATION
+     ═══════════════════════════════════════════════════════════ -->
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="readme">📖 Read Me (가이드)</button>
+  <button class="tab-btn" data-tab="data">📁 Data</button>
+  <button class="tab-btn" data-tab="simulation">🎯 Simulation</button>
+  <button class="tab-btn" data-tab="strategy">🧠 Strategy Lab (전략 실험실)</button>
+  <button class="tab-btn" data-tab="whatif">📈 Budget What-if</button>
+  <button class="tab-btn" data-tab="optimization">🏆 Optimization</button>
+  <button class="tab-btn" data-tab="backtest">🔬 Backtest</button>
+  <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT
+     ═══════════════════════════════════════════════════════════ -->
+<main class="tab-content">
+
+  <!-- ── TAB 0: READ ME ────────────────────────────────────── -->
+  <div id="tab-readme" class="tab-pane active">
+    <div class="stack" style="gap:24px;">
+
+      <!-- Intro banner -->
+      <div class="card intro-card">
+        <div class="intro-badge">🎯 핵심 목적</div>
+        <h2 style="font-size:20px;margin-bottom:8px;">“광고 일예산을 변경하면 성과는 어떻게 달라질까?”</h2>
+        <p style="color:var(--muted);font-size:14px;line-height:1.65;">
+          과거 3개월 이상의 시계열 광고 데이터를 기반으로, 특정 시점 또는 특정 기간 동안 
+          <strong>일예산을 증액/감액했을 때의 Purchase(전환), Revenue(매출), ROAS(광고수익률)</strong> 변화를 
+          통계적 수익 체감 곡선과 10,000회 몬테카를로 시뮬레이션을 통해 직관적으로 예측하는 프로그램입니다.
+        </p>
+      </div>
+
+      <!-- 4-Step Quick Start -->
+      <div class="card">
+        <div class="card-title">🚀 4단계 빠른 시작 가이드 (Quick Start)</div>
+        <div class="steps-grid">
+
+          <div class="step-card">
+            <div class="step-num">Step 1</div>
+            <div class="step-title">📁 데이터 로드하기</div>
+            <p class="step-desc">
+              <strong>[📁 Data]</strong> 탭에서 
+              <span class="hl-badge">✨ Load Sample Data</span>를 누르면 
+              3개 캠페인 90일치 실적 데이터가 즉시 준비됩니다. (보유 CSV 업로드 지원)
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">Step 2</div>
+            <div class="step-title">🎯 다중 기간 예산 시뮬레이션</div>
+            <p class="step-desc">
+              <strong>[🎯 Simulation]</strong> 탭에서 단일 기간 변경뿐 아니라 
+              <strong>"다중 기간 스케줄"</strong>을 선택하여 <em>원하는 시기에 원하는 만큼 여러 구간(예: 7월 $1,200, 8월 $1,600 등)</em>을 자유롭게 변경하고 즉시 판정을 받아보세요.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">Step 3</div>
+            <div class="step-title">🏆 판정 및 승률(신뢰도) 확인</div>
+            <p class="step-desc">
+              복잡한 통계 수식을 볼 필요 없이, 상단에 뜨는 
+              <strong>한 줄 의사결정 판정(신호등 배지)</strong>과 
+              <strong>"매출 증대 성공 확률(%)"</strong>, <strong>"한계 ROAS"</strong>로 예산 증액 타당성을 직관적으로 판단합니다.
+            </p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">Step 4</div>
+            <div class="step-title">🧠 전략 실험실 (Strategy Lab)</div>
+            <p class="step-desc">
+              <strong>[🧠 Strategy Lab]</strong> 탭에서 <em>"전주 대비 실적이 30% 좋아졌을 때 예산을 30% 늘렸다면?"</em>과 같은 유동적 성과 연동 룰을 과거 데이터에 직접 백테스트해 볼 수 있습니다.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 3 Core KPIs -->
+      <div class="card">
+        <div class="card-title">📊 3대 핵심 KPI 공식 안내</div>
+        <div class="kpi-guide-grid">
+          <div class="kpi-guide-card">
+            <div class="kpi-guide-name">1. Purchase (구매/전환)</div>
+            <div class="kpi-guide-formula">기본 컬럼: <code>cm360_transaction</code></div>
+            <p class="kpi-guide-desc">광고를 통해 발생한 실제 구매/전환 건수입니다. (Settings 탭에서 컬럼명 변경 가능)</p>
+          </div>
+          <div class="kpi-guide-card">
+            <div class="kpi-guide-name">2. Revenue (매출)</div>
+            <div class="kpi-guide-formula">기본 컬럼: <code>cm360_revenue_USD</code></div>
+            <p class="kpi-guide-desc">광고를 통해 창출된 총 매출액 (USD)입니다. (Settings 탭에서 컬럼명 변경 가능)</p>
+          </div>
+          <div class="kpi-guide-card">
+            <div class="kpi-guide-name">3. ROAS (광고 수익률)</div>
+            <div class="kpi-guide-formula">공식: <code>(Revenue / Cost) × 100%</code></div>
+            <p class="kpi-guide-desc">광고비 1달러당 창출된 매출 비율(%) 및 배수(x)입니다. 예산 증액 시 효율성을 판단하는 핵심 기준입니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistical Principles -->
+      <div class="card">
+        <div class="card-title">🧠 프로그램에 적용된 핵심 통계 원칙</div>
+        <div class="principle-list">
+
+          <div class="principle-item">
+            <div class="principle-icon">📉</div>
+            <div>
+              <div class="principle-title">1. 수익 체감의 법칙 (Diminishing Returns)</div>
+              <p class="principle-desc">
+                광고비를 2배 쓴다고 매출이나 구매가 똑같이 2배로 늘지 않습니다(비선형 관계). 
+                광고 반응 곡선 모델(<code>log(KPI) = α + β·log(Cost)</code>)을 적용하여, 
+                예산이 커질수록 증가폭이 둔화되고 ROAS가 자연스럽게 하락하는 현상을 정밀하게 반영합니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-icon">⏳</div>
+            <div>
+              <div class="principle-title">2. 최근 데이터 가중치 (Time-decay Weighting)</div>
+              <p class="principle-desc">
+                단순 과거 전체 평균 대신, 지수 감쇠(Exponential Decay) 가중치를 적용하여 
+                먼 과거보다 최근 데이터(기본 최근 4주)에 더 큰 영향력을 부여하여 최신 성과 트렌드를 유지합니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-icon">🎲</div>
+            <div>
+              <div class="principle-title">3. 10,000회 몬테카를로 시뮬레이션 (Monte Carlo)</div>
+              <p class="principle-desc">
+                단 하나의 평균값만 보여주지 않고, 과거 데이터의 불확실성과 일별 변동성을 바탕으로 
+                10,000번 가상 집행하여 <strong>Mean(평균)</strong>, <strong>Median(중앙값)</strong>, 
+                <strong>P05(비관적 하위 5%)</strong>, <strong>P95(낙관적 상위 5%)</strong> 범위를 함께 산출합니다.
+              </p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <div class="principle-icon">🔬</div>
+            <div>
+              <div class="principle-title">4. 시계열 전진 백테스트 (Time-series Backtest)</div>
+              <p class="principle-desc">
+                랜덤 추출이 아닌 시간 순서대로 과거 전반부(70%) 데이터로 모델을 학습시키고, 
+                후반부(30%) 실제 실적을 얼마나 정확히 맞추는지 오차율(MAPE, RMSE)로 검증하여 모델의 신뢰도를 입증합니다.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-readme -->
+
+  <!-- ── TAB 1: DATA ──────────────────────────────────────── -->
+  <div id="tab-data" class="tab-pane">
+    <div class="two-col">
+
+      <!-- Left: Upload + mapping -->
+      <div class="stack">
+
+        <!-- Upload Card -->
+        <div class="card">
+          <div class="card-title">📂 Load Data</div>
+
+          <div id="drop-zone" class="drop-zone"
+               onclick="document.getElementById('file-input').click()">
+            <div class="drop-icon">⬆️</div>
+            <div class="drop-text">Click or drag &amp; drop a CSV file</div>
+            <div class="drop-sub">date, campaign, cost, cm360_transaction, cm360_revenue_USD …</div>
+          </div>
+          <input type="file" id="file-input" class="file-input-hidden" accept=".csv,.txt" />
+
+          <div style="margin-top:14px;">
+            <button id="btn-sample" class="btn btn-secondary btn-sm" style="width:100%">
+              ✨ Load Sample Data (3 campaigns × 90 days)
+            </button>
+          </div>
+        </div>
+
+        <!-- Column Mapping Card -->
+        <div class="card">
+          <div class="card-title">🔗 Column Mapping</div>
+          <div class="stack" style="gap:10px;">
+            <div class="form-group">
+              <label class="form-label">Date column</label>
+              <select id="col-date"><option value="date">date</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Campaign column</label>
+              <select id="col-campaign"><option value="campaign">campaign</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cost column</label>
+              <select id="col-cost"><option value="cost">cost</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Purchase column (KPI)</label>
+              <select id="col-purchase"><option value="cm360_transaction">cm360_transaction</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Revenue column (KPI)</label>
+              <select id="col-revenue"><option value="cm360_revenue_USD">cm360_revenue_USD</option></select>
+            </div>
+            <button id="btn-apply-cols" class="btn btn-secondary btn-sm">Apply Mapping</button>
+          </div>
+        </div>
+
+      </div><!-- /left -->
+
+      <!-- Right: Summary + Preview -->
+      <div class="stack">
+        <div class="card">
+          <div class="card-title">📊 Dataset Summary</div>
+          <div id="data-summary" class="muted" style="font-size:13px;">
+            No data loaded. Load a CSV or click "Load Sample Data".
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📋 Data Preview (first 25 rows)</div>
+          <div id="data-preview" class="table-scroll">
+            <span class="muted" style="font-size:13px;">—</span>
+          </div>
+        </div>
+      </div><!-- /right -->
+
+    </div>
+  </div><!-- /tab-data -->
+
+
+  <!-- ── TAB 2: SIMULATION ────────────────────────────────── -->
+  <div id="tab-simulation" class="tab-pane">
+    <div class="two-col">
+
+      <!-- Controls -->
+      <div class="card" style="align-self:start;">
+        <div class="card-title">🎯 Simulation Controls</div>
+        <div class="stack">
+
+          <div class="form-group">
+            <label class="form-label">Campaign</label>
+            <select id="sim-campaign" class="campaign-select"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">기본 일예산 (Baseline Budget USD/day)</label>
+            <input type="number" id="sim-current-budget" min="1" step="10"
+                   placeholder="e.g. 900" />
+            <div class="muted" style="font-size:11px;">변경 구간 외의 기간에 기본 집행될 일예산입니다.</div>
+          </div>
+
+          <!-- Mode Selection -->
+          <div class="form-group">
+            <label class="form-label">예산 변경 모드</label>
+            <div class="radio-group" style="flex-direction:row;gap:14px;">
+              <label class="radio-label">
+                <input type="radio" name="sim-mode" value="single" checked />
+                단일 기간 변경
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="sim-mode" value="multi" />
+                다중 기간 스케줄 (여러 구간)
+              </label>
+            </div>
+          </div>
+
+          <!-- Panel A: Single Period -->
+          <div id="sim-single-panel" class="form-group period-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <label class="form-label" style="margin-bottom:0;">📅 단일 변경 기간</label>
+              <span id="sim-period-badge" class="period-badge">전체 기간</span>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="preset-row">
+              <button type="button" class="btn-preset active" data-preset="all">전체</button>
+              <button type="button" class="btn-preset" data-preset="4w">최근 4주</button>
+              <button type="button" class="btn-preset" data-preset="2w">최근 2주</button>
+              <button type="button" class="btn-preset" data-preset="custom">직접지정</button>
+            </div>
+
+            <div class="date-inputs-row">
+              <div>
+                <span class="sub-label">시작일</span>
+                <input type="date" id="sim-start-date" />
+              </div>
+              <span style="color:var(--muted);margin-top:18px;">~</span>
+              <div>
+                <span class="sub-label">종료일</span>
+                <input type="date" id="sim-end-date" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:10px;">
+              <label class="form-label">해당 기간 변경 일예산 (USD/day)</label>
+              <input type="number" id="sim-new-budget" min="1" step="10"
+                     placeholder="e.g. 1350" />
+            </div>
+          </div>
+
+          <!-- Panel B: Multi-period Shifts (Hidden by default) -->
+          <div id="sim-multi-panel" class="form-group period-box" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <label class="form-label" style="margin-bottom:0;">🗓️ 기간별 예산 스케줄 목록</label>
+              <button type="button" id="btn-add-schedule" class="btn btn-secondary btn-sm">+ 구간 추가</button>
+            </div>
+            <div id="sim-schedule-list" class="schedule-list">
+              <!-- Dynamically rendered shift cards -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Analysis window (최근 가중 데이터)</label>
+            <div class="range-row">
+              <input type="range" id="sim-weeks" min="1" max="12" value="4" />
+              <span class="range-val"><span id="sim-weeks-val">4</span> wks</span>
+            </div>
+          </div>
+
+          <button id="btn-run-sim" class="btn btn-primary">▶ Run Simulation</button>
+
+          <div class="muted" style="font-size:11px;line-height:1.6;">
+            <strong>Method:</strong> Log-log regression (diminishing returns) fitted on
+            time-decay weighted recent data, then 10,000 Monte Carlo runs per KPI.
+          </div>
+        </div>
+      </div><!-- /controls -->
+
+      <!-- Results -->
+      <div id="sim-results" style="min-height:200px;">
+        <div class="card" style="color:var(--muted);font-size:13px;padding:40px;text-align:center;">
+          Configure a campaign and budget above, then click <strong>Run Simulation</strong>.
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-simulation -->
+
+
+  <!-- ── TAB 2-B: STRATEGY LAB (신규: 규칙 기반 전략 실험실) ────── -->
+  <div id="tab-strategy" class="tab-pane">
+    <div class="two-col">
+
+      <!-- Left: Controls -->
+      <div class="card" style="align-self:start;">
+        <div class="card-title">🧠 전략 규칙 설정 (Rule Builder)</div>
+        <div class="stack">
+
+          <div class="form-group">
+            <label class="form-label">Campaign</label>
+            <select id="strat-campaign" class="campaign-select"></select>
+          </div>
+
+          <!-- Strategy Presets -->
+          <div class="form-group">
+            <label class="form-label">🚀 추천 전략 프리셋 (원클릭 세팅)</label>
+            <div class="strategy-preset-list">
+              <button type="button" class="btn-strat-preset active" data-preset="momentum">
+                <div class="bsp-title">🚀 성과 모멘텀 30% 증액</div>
+                <div class="bsp-desc">전주 대비 전환수 +30% 이상 시 예산 +30% 증액 / -20% 하락 시 -10% 감액</div>
+              </button>
+              <button type="button" class="btn-strat-preset" data-preset="roas_guard">
+                <div class="bsp-title">🛡️ ROAS 방어 전략</div>
+                <div class="bsp-desc">전주 대비 ROAS +15% 이상 시 예산 +15% 증액 / -15% 하락 시 -20% 감액</div>
+              </button>
+              <button type="button" class="btn-strat-preset" data-preset="revenue_scale">
+                <div class="bsp-title">💰 매출 스케일링 전략</div>
+                <div class="bsp-desc">전주 대비 매출액 +20% 이상 시 예산 +20% 증액 / -15% 하락 시 -15% 감액</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Rule Builder Form -->
+          <div class="card" style="background:var(--bg);border-color:var(--border);padding:14px;">
+            <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;">
+              ⚙️ 커스텀 조건 설정
+            </div>
+
+            <div class="form-group">
+              <label class="sub-label">1. 감지 지표 (Trigger Metric)</label>
+              <select id="strat-metric">
+                <option value="purchase">Purchase (전환수)</option>
+                <option value="revenue">Revenue (매출액)</option>
+                <option value="roas">ROAS (수익률)</option>
+              </select>
+            </div>
+
+            <div class="two-col-eq" style="margin-top:8px;">
+              <div class="form-group">
+                <label class="sub-label">2. 상승 감지 기준 (%)</label>
+                <input type="number" id="strat-threshold" value="30" step="5" placeholder="예: 30" />
+                <span class="muted" style="font-size:10px;">전주 대비 WoW +%</span>
+              </div>
+              <div class="form-group">
+                <label class="sub-label">3. 예산 증액폭 (%)</label>
+                <input type="number" id="strat-action-val" value="30" step="5" placeholder="예: 30" />
+                <span class="muted" style="font-size:10px;">다음 주 일예산 증액%</span>
+              </div>
+            </div>
+
+            <div style="border-top:1px solid var(--border);margin:12px 0 8px;"></div>
+
+            <div class="form-group">
+              <label class="radio-label" style="font-size:12px;">
+                <input type="checkbox" id="strat-has-neg" checked />
+                실적 하락 시 감액 규칙도 함께 적용
+              </label>
+            </div>
+
+            <div id="strat-neg-group" class="two-col-eq" style="margin-top:4px;">
+              <div class="form-group">
+                <label class="sub-label">하락 감지 기준 (%)</label>
+                <input type="number" id="strat-neg-threshold" value="-20" step="5" placeholder="예: -20" />
+              </div>
+              <div class="form-group">
+                <label class="sub-label">예산 감액폭 (%)</label>
+                <input type="number" id="strat-neg-action-val" value="-10" step="5" placeholder="예: -10" />
+              </div>
+            </div>
+
+            <div class="two-col-eq" style="margin-top:10px;">
+              <div class="form-group">
+                <label class="sub-label">안전 최저 일예산 ($)</label>
+                <input type="number" id="strat-min-budget" value="100" min="10" />
+              </div>
+              <div class="form-group">
+                <label class="sub-label">안전 최고 일예산 ($)</label>
+                <input type="number" id="strat-max-budget" value="3000" min="100" />
+              </div>
+            </div>
+
+          </div><!-- /custom rule builder -->
+
+          <button id="btn-run-strategy" class="btn btn-primary">▶ 전략 백테스트 실행</button>
+
+          <div class="muted" style="font-size:11px;line-height:1.6;">
+            <strong>원리:</strong> 과거 실적 데이터를 주차별(7일)로 롤링하며, 
+            지정한 조건 룰에 맞춰 예산을 유동적으로 증감했을 때의 
+            성과를 실제 집행 실적과 1:1로 비교합니다.
+          </div>
+        </div>
+      </div><!-- /left controls -->
+
+      <!-- Right: Results -->
+      <div id="strat-results" style="min-height:200px;">
+        <div class="card" style="color:var(--muted);font-size:13px;padding:40px;text-align:center;">
+          좌측에서 캠페인과 전략 규칙을 선택한 후 <strong>전략 백테스트 실행</strong>을 클릭하세요.
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-strategy -->
+
+
+  <!-- ── TAB 3: BUDGET WHAT-IF ─────────────────────────────── -->
+  <div id="tab-whatif" class="tab-pane">
+    <div class="two-col">
+
+      <!-- Controls -->
+      <div class="card" style="align-self:start;">
+        <div class="card-title">📈 What-if Controls</div>
+        <div class="stack">
+
+          <div class="form-group">
+            <label class="form-label">Campaign</label>
+            <select id="whatif-campaign" class="campaign-select"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Analysis window</label>
+            <div class="range-row">
+              <input type="range" id="whatif-weeks" min="1" max="12" value="4" />
+              <span class="range-val">4 wks</span>
+            </div>
+          </div>
+
+          <!-- Manual budget add -->
+          <div class="form-group">
+            <label class="form-label">Add Budget Value (USD)</label>
+            <div class="input-row">
+              <input type="number" id="whatif-new-budget" min="1" step="10"
+                     placeholder="e.g. 1200" />
+              <button id="btn-add-budget" class="btn btn-secondary btn-sm">+ Add</button>
+            </div>
+          </div>
+
+          <!-- Range generator -->
+          <div class="form-group">
+            <label class="form-label">Range Generator</label>
+            <div class="range-gen">
+              <input type="number" id="range-min" placeholder="Min $" min="1" />
+              <input type="number" id="range-max" placeholder="Max $" min="1" />
+              <input type="number" id="range-count" placeholder="Count" min="2" max="20" value="8" />
+            </div>
+            <button id="btn-gen-range" class="btn btn-secondary btn-sm" style="margin-top:6px;">
+              ⚡ Generate Range
+            </button>
+          </div>
+
+          <!-- Budget list -->
+          <div class="form-group">
+            <label class="form-label">Budget List</label>
+            <div id="whatif-budget-list" class="budget-list">
+              <span class="muted" style="font-size:12px;">No budgets added yet.</span>
+            </div>
+          </div>
+
+          <button id="btn-run-whatif" class="btn btn-primary">▶ Run What-if</button>
+        </div>
+      </div><!-- /controls -->
+
+      <!-- Results -->
+      <div id="whatif-results" style="min-height:200px;">
+        <div class="card" style="color:var(--muted);font-size:13px;padding:40px;text-align:center;">
+          Add budgets to compare and click <strong>Run What-if</strong>.
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-whatif -->
+
+
+  <!-- ── TAB 4: OPTIMIZATION ──────────────────────────────── -->
+  <div id="tab-optimization" class="tab-pane">
+    <div class="two-col">
+
+      <!-- Controls -->
+      <div class="card" style="align-self:start;">
+        <div class="card-title">🏆 Optimization Controls</div>
+        <div class="stack">
+
+          <div class="form-group">
+            <label class="form-label">Campaign</label>
+            <select id="opt-campaign" class="campaign-select"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Analysis window</label>
+            <div class="range-row">
+              <input type="range" id="opt-weeks" min="1" max="12" value="4" />
+              <span class="range-val">4 wks</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Objective</label>
+            <div class="radio-group" id="opt-objective-group">
+              <label class="radio-label">
+                <input type="radio" name="opt-obj" value="revenue" checked />
+                Maximize Revenue
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="opt-obj" value="purchase" />
+                Maximize Purchase
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="opt-obj" value="roas" />
+                Maximize ROAS
+              </label>
+            </div>
+          </div>
+
+          <div class="two-col-eq">
+            <div class="form-group">
+              <label class="form-label">Min Budget (USD)</label>
+              <input type="number" id="opt-min-budget" min="1" placeholder="e.g. 200" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Max Budget (USD)</label>
+              <input type="number" id="opt-max-budget" min="1" placeholder="e.g. 2000" />
+            </div>
+          </div>
+
+          <button id="btn-run-opt" class="btn btn-primary">▶ Find Optimal Budget</button>
+
+          <div class="muted" style="font-size:11px;line-height:1.6;">
+            Grid search over 600 budget points. ROAS naturally decreases with
+            higher spend due to diminishing returns (β&nbsp;&lt;&nbsp;1).
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="opt-results" style="min-height:200px;">
+        <div class="card" style="color:var(--muted);font-size:13px;padding:40px;text-align:center;">
+          Set objective and budget range, then click <strong>Find Optimal Budget</strong>.
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-optimization -->
+
+
+  <!-- ── TAB 5: BACKTEST ──────────────────────────────────── -->
+  <div id="tab-backtest" class="tab-pane">
+    <div class="two-col">
+
+      <!-- Controls -->
+      <div class="card" style="align-self:start;">
+        <div class="card-title">🔬 Backtest Controls</div>
+        <div class="stack">
+
+          <div class="form-group">
+            <label class="form-label">Campaign</label>
+            <select id="bt-campaign" class="campaign-select"></select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Train ratio</label>
+            <div class="range-row">
+              <input type="range" id="bt-train-ratio" min="0.5" max="0.9" step="0.05" value="0.7" />
+              <span class="range-val"><span id="bt-train-ratio-val">70%</span></span>
+            </div>
+            <div class="muted" style="font-size:11px;margin-top:4px;">
+              Data sorted by date. First N% used for training, remainder for testing.
+            </div>
+          </div>
+
+          <button id="btn-run-backtest" class="btn btn-primary">▶ Run Backtest</button>
+
+          <div class="muted" style="font-size:11px;line-height:1.6;">
+            <strong>Method:</strong> Temporal split (no random shuffle). Model trained
+            on earlier dates, predictions evaluated on later dates.
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="bt-results" style="min-height:200px;">
+        <div class="card" style="color:var(--muted);font-size:13px;padding:40px;text-align:center;">
+          Select a campaign and click <strong>Run Backtest</strong>.
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-backtest -->
+
+
+  <!-- ── TAB 6: SETTINGS ──────────────────────────────────── -->
+  <div id="tab-settings" class="tab-pane">
+    <div class="two-col">
+
+      <div class="card">
+        <div class="card-title">⚙️ Model Parameters</div>
+        <div class="stack">
+
+          <div class="form-group">
+            <label class="form-label">Time-decay rate λ (0.01–0.5)</label>
+            <input type="number" id="set-lambda" min="0.01" max="0.5" step="0.01" value="0.10" />
+            <div class="muted" style="font-size:11px;">
+              Higher λ → more weight on recent data. Default: 0.10
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Monte Carlo simulation runs</label>
+            <input type="number" id="set-simruns" min="500" max="100000" step="500" value="10000" />
+            <div class="muted" style="font-size:11px;">
+              More runs → tighter confidence intervals, slower computation. Default: 10,000
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Default analysis window (weeks)</label>
+            <input type="number" id="set-weeks" min="1" max="52" value="4" />
+          </div>
+
+          <button id="btn-apply-settings" class="btn btn-primary">✓ Apply Settings</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔗 KPI Column Overrides</div>
+        <div class="stack">
+
+          <div class="form-group">
+            <label class="form-label">Purchase KPI column</label>
+            <input type="text" id="set-purchase-col" value="cm360_transaction"
+                   placeholder="Column name for Purchase" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Revenue KPI column</label>
+            <input type="text" id="set-revenue-col" value="cm360_revenue_USD"
+                   placeholder="Column name for Revenue" />
+          </div>
+
+          <div class="muted" style="font-size:12px;line-height:1.7;">
+            <strong>Note:</strong> ROAS is always computed as <code>Revenue / Cost × 100</code>.<br/>
+            If your CSV contains a <code>daily_budget</code> column, you can map Cost to that column
+            instead of <code>cost</code> to use actual daily budgets for modelling.
+          </div>
+
+          <div class="card" style="background:var(--bg);border-color:var(--border);">
+            <div style="font-size:12px;font-weight:600;margin-bottom:8px;">Model Interpretation</div>
+            <div class="muted" style="font-size:12px;line-height:1.7;">
+              The log-log model fits: <code>log(KPI) = α + β · log(cost)</code><br/>
+              β &lt; 1 → <strong>diminishing returns</strong> (expected in digital advertising)<br/>
+              β ≈ 1 → linear relationship<br/>
+              β &gt; 1 → increasing returns (unusual)
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-settings -->
+
+</main><!-- /tab-content -->
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Scripts — order matters: data → model → charts → app -->
+<script src="data.js"></script>
+<script src="model.js"></script>
+<script src="charts.js"></script>
+<script src="app.js"></script>
+
+<!-- Patch range sliders for live label updates (whatif, opt) -->
+<script>
+  // Range slider live labels
+  document.querySelectorAll('input[type="range"]').forEach(el => {
+    el.addEventListener('input', () => {
+      const v = parseFloat(el.value);
+      if (el.id === 'bt-train-ratio') {
+        document.getElementById('bt-train-ratio-val').textContent = Math.round(v * 100) + '%';
+      } else if (el.id === 'sim-weeks') {
+        document.getElementById('sim-weeks-val').textContent = el.value;
+      } else if (el.id === 'whatif-weeks' || el.id === 'opt-weeks') {
+        const rv = el.parentElement.querySelector('.range-val');
+        if (rv) rv.textContent = el.value + ' wks';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
